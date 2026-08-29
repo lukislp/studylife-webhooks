@@ -1,0 +1,18 @@
+# Points Flux at this repo. Needs write access (not just read), since
+# image-automation-controller pushes commits for new image tags directly to main (see
+# 04-image-update-automation.yaml). Reuses the cluster-wide "studylife-git-auth" secret
+# (flux-system namespace, managed in the homelab-infra repo) rather than a repo-specific one -
+# same as studylife-ai's own k8s/flux/01-git-source.yaml. This repo is private (unlike
+# studylife-ai/studylife) but that same PAT already has repo access regardless.
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: studylife-webhooks
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: https://github.com/lukislp/studylife-webhooks.git
+  ref:
+    branch: main
+  secretRef:
+    name: studylife-git-auth

@@ -1,0 +1,12 @@
+# Scans GHCR for new tags of this repo's image (.github/workflows/ci.yml "docker" job).
+# The repo itself is private, but the built image package is set to public visibility
+# (compiled artifact only, no source) precisely so this needs no secretRef here and the
+# Deployment (k8s/03-app.yaml) needs no imagePullSecrets - same as studylife-ai/studylife-mcp.
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: studylife-webhooks
+  namespace: flux-system
+spec:
+  image: ghcr.io/lukislp/studylife-webhooks
+  interval: 5m

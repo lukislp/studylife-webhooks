@@ -1,0 +1,13 @@
+# Non-secret runtime configuration. Flux-managed (see k8s/flux-deploy/kustomization.yaml) -
+# kustomize-controller's ClusterRole grants it "configmaps" but deliberately NOT "secrets" -
+# see k8s/02-secret.yaml for why that one stays bootstrap-only. Mirrors studylife-ai's own
+# k8s/01-config.yaml split.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: studylife-webhooks-config
+  namespace: studylife-webhooks
+data:
+  # Inside the mounted PVC (k8s/03-app.yaml) - the default "webhooks.db" (config.py) would
+  # otherwise land in the container's ephemeral filesystem root and be lost on every restart.
+  STUDYLIFE_WEBHOOKS_DB_PATH: "/app/data/webhooks.db"
