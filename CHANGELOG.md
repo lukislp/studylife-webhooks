@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/lukislp/studylife-webhooks/compare/v1.0.0...v1.1.0) (2026-08-29)
+
+
+### Features
+
+* document the expanded webhook event catalog ([39c083a](https://github.com/lukislp/studylife-webhooks/commit/39c083a1b46380591e3f82c46c537c6decdae642))
+
 # 1.0.0 (2026-08-29)
 
 
