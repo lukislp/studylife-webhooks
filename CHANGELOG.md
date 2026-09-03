@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/lukislp/studylife-webhooks/compare/v1.1.1...v1.2.0) (2026-09-03)
+
+
+### Features
+
+* expose Prometheus metrics for webhook delivery and HTTP requests ([c317c91](https://github.com/lukislp/studylife-webhooks/commit/c317c91e744248ae2066e28821a5bec4b126957c))
+
 ## [1.1.1](https://github.com/lukislp/studylife-webhooks/compare/v1.1.0...v1.1.1) (2026-09-03)
 
 
