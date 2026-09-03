@@ -6,6 +6,14 @@ import httpx
 
 from studylife_webhooks.db import Webhook
 from studylife_webhooks.delivery import deliver_all, deliver_one, sign_payload
+from studylife_webhooks.metrics import DELIVERIES_TOTAL, UPSTREAM_REQUESTS_TOTAL
+
+
+def _counter_value(counter, **labels) -> float:
+    """prometheus_client counters are process-global, so tests read a before/after delta
+    rather than asserting an absolute value - other tests in this process may already have
+    incremented the same label combination."""
+    return counter.labels(**labels)._value.get()
 
 
 def _webhook(
@@ -85,6 +93,76 @@ async def test_deliver_one_network_failure_does_not_raise():
 
 async def test_deliver_all_empty_list_returns_empty():
     assert await deliver_all([], "session.completed", "2026-08-29T12:00:00Z", {}) == []
+
+
+async def test_deliver_one_success_increments_ok_and_delivered_metrics():
+    transport = httpx.MockTransport(lambda request: httpx.Response(200))
+    before_upstream = _counter_value(
+        UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="ok"
+    )
+    before_delivered = _counter_value(DELIVERIES_TOTAL, outcome="delivered")
+
+    await deliver_one(
+        _webhook(), "session.completed", "2026-08-29T12:00:00Z", {}, transport=transport
+    )
+
+    assert (
+        _counter_value(UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="ok")
+        == before_upstream + 1
+    )
+    assert _counter_value(DELIVERIES_TOTAL, outcome="delivered") == before_delivered + 1
+
+
+async def test_deliver_one_non_success_increments_http_error_and_failed_metrics():
+    transport = httpx.MockTransport(lambda request: httpx.Response(500))
+    before_upstream = _counter_value(
+        UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="http_error"
+    )
+    before_failed = _counter_value(DELIVERIES_TOTAL, outcome="failed")
+
+    await deliver_one(
+        _webhook(), "session.completed", "2026-08-29T12:00:00Z", {}, transport=transport
+    )
+
+    assert (
+        _counter_value(
+            UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="http_error"
+        )
+        == before_upstream + 1
+    )
+    assert _counter_value(DELIVERIES_TOTAL, outcome="failed") == before_failed + 1
+
+
+async def test_deliver_one_timeout_increments_timeout_metric_not_failed():
+    def handler(request: httpx.Request):
+        raise httpx.TimeoutException("timed out", request=request)
+
+    transport = httpx.MockTransport(handler)
+    before_timeout = _counter_value(
+        UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="timeout"
+    )
+    before_failed = _counter_value(
+        UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="failed"
+    )
+
+    await deliver_one(
+        _webhook(), "session.completed", "2026-08-29T12:00:00Z", {}, transport=transport
+    )
+
+    assert (
+        _counter_value(
+            UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="timeout"
+        )
+        == before_timeout + 1
+    )
+    # Not double-counted under the generic "failed" outcome too - TimeoutException must be
+    # caught before the broader httpx.HTTPError branch.
+    assert (
+        _counter_value(
+            UPSTREAM_REQUESTS_TOTAL, target="webhook-target", outcome="failed"
+        )
+        == before_failed
+    )
 
 
 async def test_deliver_all_delivers_to_every_subscriber_independently():

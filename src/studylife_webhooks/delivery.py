@@ -8,12 +8,23 @@ import asyncio
 import hashlib
 import hmac
 import json
+import time
 from dataclasses import dataclass
 
 import httpx
 
 from studylife_webhooks.config import settings
 from studylife_webhooks.db import Webhook
+from studylife_webhooks.metrics import (
+    DELIVERIES_TOTAL,
+    UPSTREAM_REQUEST_DURATION_SECONDS,
+    UPSTREAM_REQUESTS_TOTAL,
+)
+
+# Fixed label value for every outbound delivery - target_url is an arbitrary user-configured
+# URL with unbounded cardinality, so it never becomes a metric label (see metrics.py's module
+# docstring).
+_TARGET_LABEL = "webhook-target"
 
 
 @dataclass
@@ -41,6 +52,7 @@ async def deliver_one(
         {"event_type": event_type, "occurred_at": occurred_at, "payload": payload}
     ).encode()
     signature = sign_payload(webhook.secret, body)
+    start = time.perf_counter()
     try:
         async with httpx.AsyncClient(
             timeout=settings.delivery_timeout_seconds, transport=transport
@@ -56,13 +68,34 @@ async def deliver_one(
                     "X-StudyLife-Webhook-Signature": signature,
                 },
             )
-        return DeliveryResult(
-            webhook_id=webhook.id,
-            delivered=response.is_success,
-            status_code=response.status_code,
-        )
-    except httpx.HTTPError as exc:
+    except httpx.TimeoutException as exc:
+        # Must be checked before the generic httpx.HTTPError below - TimeoutException is a
+        # subclass of it, and "the subscriber never responded in time" is worth telling apart
+        # from other network failures (e.g. connection refused).
+        _record_upstream(start, outcome="timeout")
+        DELIVERIES_TOTAL.labels(outcome="failed").inc()
         return DeliveryResult(webhook_id=webhook.id, delivered=False, error=str(exc))
+    except httpx.HTTPError as exc:
+        _record_upstream(start, outcome="failed")
+        DELIVERIES_TOTAL.labels(outcome="failed").inc()
+        return DeliveryResult(webhook_id=webhook.id, delivered=False, error=str(exc))
+
+    _record_upstream(start, outcome="ok" if response.is_success else "http_error")
+    DELIVERIES_TOTAL.labels(
+        outcome="delivered" if response.is_success else "failed"
+    ).inc()
+    return DeliveryResult(
+        webhook_id=webhook.id,
+        delivered=response.is_success,
+        status_code=response.status_code,
+    )
+
+
+def _record_upstream(start: float, outcome: str) -> None:
+    UPSTREAM_REQUEST_DURATION_SECONDS.labels(target=_TARGET_LABEL).observe(
+        time.perf_counter() - start
+    )
+    UPSTREAM_REQUESTS_TOTAL.labels(target=_TARGET_LABEL, outcome=outcome).inc()
 
 
 async def deliver_all(
