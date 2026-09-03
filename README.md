@@ -72,6 +72,30 @@ event type on the StudyLife side never needs a change here. Subscribe to individ
 | `study_program.deleted` | A custom study program is deleted |
 | `plan.generated` | The exam planner generates a batch of study sessions |
 
+## Metrics
+
+`GET /metrics` (no auth, same port as everything else) exposes Prometheus metrics: HTTP request
+duration/count for every route (labeled by the matched route *template*, e.g.
+`/internal/webhooks/{webhook_id}` - never the raw path, so a real webhook id never becomes a
+label value) plus outbound delivery outcomes to subscribers' own target URLs (labeled with a
+fixed `webhook-target` value, never the actual URL, which is arbitrary and user-configured -
+unbounded cardinality otherwise).
+
+| Metric | Type | Labels | Shows |
+| --- | --- | --- | --- |
+| `studylife_webhooks_request_duration_seconds` | Histogram | `route`, `method` | HTTP latency per route |
+| `studylife_webhooks_requests_total` | Counter | `route`, `method`, `status_class` | HTTP request volume by outcome |
+| `studylife_webhooks_upstream_requests_total` | Counter | `target`, `outcome` (`ok`/`http_error`/`failed`/`timeout`) | Outbound delivery attempts by outcome |
+| `studylife_webhooks_upstream_request_duration_seconds` | Histogram | `target` | Outbound delivery latency |
+| `studylife_webhooks_deliveries_total` | Counter | `outcome` (`delivered`/`failed`) | Overall delivery success rate |
+
+No `delivery_attempts` histogram - `deliver_all` makes a single attempt per subscriber with no
+retry mechanism, so there's nothing to count attempts of yet.
+
+Scraped by the homelab's existing self-hosted Prometheus (`homelab-infra` repo,
+`monitoring/01-prometheus.yaml`) - a `studylife-webhooks` scrape job is being added there as
+part of the same rollout that instrumented this service.
+
 ## Configuration
 
 | Env var | Description |

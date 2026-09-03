@@ -17,15 +17,21 @@ own WebhookEventTypes catalog is documentation for callers, not a contract this 
 is the whole point of "theoretically subscribe to anything" instead of one hardcoded event.
 """
 
+import time
 from contextlib import asynccontextmanager
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
 from studylife_webhooks import db
 from studylife_webhooks.config import settings
 from studylife_webhooks.delivery import deliver_all
+from studylife_webhooks.metrics import (
+    REQUEST_DURATION_SECONDS,
+    REQUESTS_TOTAL,
+    render_latest,
+)
 
 
 @asynccontextmanager
@@ -35,6 +41,38 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="studylife-webhooks", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def record_request_metrics(request: Request, call_next):
+    """Times every request and records it under the matched route TEMPLATE, not the raw path -
+    request.scope["route"] is only populated once routing has resolved the request, so it's
+    read AFTER call_next() returns, not before. A 404 (no route matched at all) falls back to
+    the fixed "unmatched" label instead of the raw path - otherwise a webhook_id typo'd into
+    the URL, or the id of a webhook that was since deleted, would create a fresh label value
+    per request, which is exactly the unbounded-cardinality problem route templates avoid."""
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration = time.perf_counter() - start
+
+    route = request.scope.get("route")
+    route_label = route.path if route is not None else "unmatched"
+    status_class = f"{response.status_code // 100}xx"
+
+    REQUEST_DURATION_SECONDS.labels(route=route_label, method=request.method).observe(
+        duration
+    )
+    REQUESTS_TOTAL.labels(
+        route=route_label, method=request.method, status_class=status_class
+    ).inc()
+
+    return response
+
+
+@app.get("/metrics")
+def metrics() -> Response:
+    body, content_type = render_latest()
+    return Response(body, media_type=content_type)
 
 
 def require_shared_secret(

@@ -187,3 +187,27 @@ def test_publish_event_with_no_subscribers_delivers_nothing(client):
 
     assert response.status_code == 200
     assert response.json() == {"delivered": 0, "failed": 0}
+
+
+def test_metrics_endpoint_exposes_request_duration_after_a_request(client):
+    client.get("/health")
+
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert "studylife_webhooks_request_duration_seconds" in response.text
+
+
+def test_metrics_use_route_template_not_the_raw_id_in_the_path(client):
+    real_id = "some-real-id-123"
+
+    response = client.delete(
+        f"/internal/webhooks/{real_id}", params={"user_id": 1}, headers=HEADERS
+    )
+    assert response.status_code == 404  # no such webhook - route still matched though
+
+    body = client.get("/metrics").text
+
+    assert "/internal/webhooks/{webhook_id}" in body
+    assert real_id not in body

@@ -48,3 +48,22 @@ spec:
           podSelector: { matchLabels: { app: studylife-web } }
       ports:
         - { protocol: TCP, port: 8000 }
+---
+# Lets the existing self-hosted Prometheus (studylife repo's k8s/14-prometheus.yaml) scrape
+# /metrics - it reaches pods directly (kubernetes_sd_configs, role: pod), not through any
+# Ingress/Gateway path, so this is the only allowance /metrics needs. Same podSelector-scoped
+# pattern as studylife-mcp's own k8s/05-network-policies.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-to-studylife-webhooks
+  namespace: studylife-webhooks
+spec:
+  podSelector: { matchLabels: { app: studylife-webhooks } }
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: monitoring } }
+          podSelector: { matchLabels: { app: prometheus } }
+      ports:
+        - { protocol: TCP, port: 8000 }
