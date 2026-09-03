@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/lukislp/studylife-webhooks/compare/v1.1.0...v1.1.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* **ci:** add Dependabot for github-actions, uv, docker ([7f8a3ac](https://github.com/lukislp/studylife-webhooks/commit/7f8a3ac584727a8365e34de27dd87a8902353905))
+
 # [1.1.0](https://github.com/lukislp/studylife-webhooks/compare/v1.0.0...v1.1.0) (2026-08-29)
 
 
