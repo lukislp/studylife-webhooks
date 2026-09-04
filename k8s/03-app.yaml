@@ -49,7 +49,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: studylife-webhooks
-          image: ghcr.io/lukislp/studylife-webhooks:1.2.0 # {"$imagepolicy": "flux-system:studylife-webhooks"}
+          image: ghcr.io/lukislp/studylife-webhooks:1.2.1 # {"$imagepolicy": "flux-system:studylife-webhooks"}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities: {drop: ["ALL"]}
