@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/lukislp/studylife-webhooks/compare/v1.2.1...v1.2.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **ci:** ignore base image major bumps in Dependabot ([b52c22e](https://github.com/lukislp/studylife-webhooks/commit/b52c22e8afac011c4e7b7d8d6bf3a82336653fb8))
+
 ## [1.2.1](https://github.com/lukislp/studylife-webhooks/compare/v1.2.0...v1.2.1) (2026-09-04)
 
 
