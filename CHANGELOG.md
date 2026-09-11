@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/lukislp/studylife-webhooks/compare/v1.2.2...v1.2.3) (2026-09-11)
+
+
+### Bug Fixes
+
+* **ci:** push release commits as a deploy key so the default branch can be ruleset-protected ([2525e49](https://github.com/lukislp/studylife-webhooks/commit/2525e49b0d49bfce8dfaae518b90354eae3e692c))
+
 ## [1.2.2](https://github.com/lukislp/studylife-webhooks/compare/v1.2.1...v1.2.2) (2026-09-04)
 
 
