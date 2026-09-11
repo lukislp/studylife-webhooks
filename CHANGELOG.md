@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/lukislp/studylife-webhooks/compare/v1.2.4...v1.2.5) (2026-09-11)
+
+
+### Bug Fixes
+
+* **ci:** read-only GITHUB_TOKEN in the Dependabot auto-merge workflow ([7658c8c](https://github.com/lukislp/studylife-webhooks/commit/7658c8cf39d2d461eaef8183ad508be1172581b0))
+
 ## [1.2.4](https://github.com/lukislp/studylife-webhooks/compare/v1.2.3...v1.2.4) (2026-09-11)
 
 
