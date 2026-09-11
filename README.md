@@ -1,5 +1,7 @@
 # StudyLife Webhooks
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/lukislp/studylife-webhooks/badge)](https://scorecard.dev/viewer/?uri=github.com/lukislp/studylife-webhooks) [![CodeQL](https://github.com/lukislp/studylife-webhooks/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/lukislp/studylife-webhooks/security/code-scanning)
+
 A small microservice extending [StudyLife](https://github.com/lukislp/studylife) with outbound
 webhooks: register a target URL and a list of event types, and this service fires a signed HTTP
 `POST` to it whenever one of those events happens - sessions, notes, course goals, session
