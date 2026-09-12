@@ -44,6 +44,19 @@ jobs:
       - run: uv sync --frozen
       - run: uv run pytest
 
+  # Coverage-guided fuzzing of the request models and the payload signature (fuzz/): a short
+  # fixed budget per run, enough to catch a crash on the next code change.
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.5.8"
+      - run: uv python install 3.12
+      - run: uv sync --frozen --group fuzz
+      - run: uv run python fuzz/fuzz_publish_event.py -max_total_time=30 -rss_limit_mb=1024
+
   # ---------------------------------------------------------------------
   # Version / image / release - push to main only, mirrors studylife-ai's
   # own ci.yml pattern (see that repo's docs/decisions.md "M5 - Deployment
