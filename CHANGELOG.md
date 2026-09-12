@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/lukislp/studylife-webhooks/compare/v1.2.5...v1.2.6) (2026-09-12)
+
+
+### Bug Fixes
+
+* **ci:** bump the deployment image tag from the pipeline instead of Flux ([#19](https://github.com/lukislp/studylife-webhooks/issues/19)) ([e792b0c](https://github.com/lukislp/studylife-webhooks/commit/e792b0c7cc53b8a0222d459cb3c496cfd848bf16))
+
 ## [1.2.5](https://github.com/lukislp/studylife-webhooks/compare/v1.2.4...v1.2.5) (2026-09-11)
 
 
