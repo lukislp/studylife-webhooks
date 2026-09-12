@@ -5,3 +5,9 @@ __pycache__/
 .ruff_cache/
 *.db
 *.egg-info/
+
+# libFuzzer artifacts written by fuzz/ harness runs
+crash-*
+leak-*
+timeout-*
+oom-*
