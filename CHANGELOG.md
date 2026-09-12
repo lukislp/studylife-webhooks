@@ -1,3 +1,10 @@
+## [1.2.7](https://github.com/lukislp/studylife-webhooks/compare/v1.2.6...v1.2.7) (2026-09-12)
+
+
+### Bug Fixes
+
+* **ci:** build the image from the tip of main like get-version does ([#31](https://github.com/lukislp/studylife-webhooks/issues/31)) ([ef69bda](https://github.com/lukislp/studylife-webhooks/commit/ef69bda61aea96ba259512c4b0239ea33fe3be6c))
+
 ## [1.2.6](https://github.com/lukislp/studylife-webhooks/compare/v1.2.5...v1.2.6) (2026-09-12)
 
 
