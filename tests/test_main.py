@@ -16,10 +16,7 @@ def test_internal_routes_reject_missing_shared_secret(client):
         ).status_code
         == 401
     )
-    assert (
-        client.delete("/internal/webhooks/some-id", params={"user_id": 1}).status_code
-        == 401
-    )
+    assert client.delete("/internal/webhooks/some-id", params={"user_id": 1}).status_code == 401
     assert (
         client.post(
             "/internal/events",
@@ -107,9 +104,7 @@ def test_delete_webhook(client):
     )
     assert response.status_code == 200
 
-    remaining = client.get(
-        "/internal/webhooks", params={"user_id": 1}, headers=HEADERS
-    ).json()
+    remaining = client.get("/internal/webhooks", params={"user_id": 1}, headers=HEADERS).json()
     assert remaining == []
 
 
@@ -153,9 +148,7 @@ def test_publish_event_delivers_to_matching_subscribers(client, monkeypatch):
         assert (
             len(webhooks) == 1
         )  # only the session.completed subscriber, not the timer.started one
-        return [
-            DeliveryResult(webhook_id=webhooks[0].id, delivered=True, status_code=200)
-        ]
+        return [DeliveryResult(webhook_id=webhooks[0].id, delivered=True, status_code=200)]
 
     monkeypatch.setattr(main, "deliver_all", fake_deliver_all)
 
