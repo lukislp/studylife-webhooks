@@ -2,9 +2,7 @@ from studylife_webhooks import db
 
 
 def test_create_and_list_webhook(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
     created = db.create_webhook(
@@ -20,21 +18,15 @@ def test_create_and_list_webhook(tmp_path, monkeypatch):
     assert listed[0].id == created.id
     assert (
         listed[0].secret == created.secret
-    )  # list still returns the stored secret internally - main.py's WebhookOut is what hides it from the API response
+    )  # the store still returns the secret; main.py's WebhookOut hides it from the API response
 
 
 def test_list_webhooks_scoped_to_user_id(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
-    db.create_webhook(
-        user_id=1, target_url="https://a.test", events=["session.completed"]
-    )
-    db.create_webhook(
-        user_id=2, target_url="https://b.test", events=["session.completed"]
-    )
+    db.create_webhook(user_id=1, target_url="https://a.test", events=["session.completed"])
+    db.create_webhook(user_id=2, target_url="https://b.test", events=["session.completed"])
 
     assert len(db.list_webhooks(1)) == 1
     assert len(db.list_webhooks(2)) == 1
@@ -42,9 +34,7 @@ def test_list_webhooks_scoped_to_user_id(tmp_path, monkeypatch):
 
 
 def test_delete_webhook_scoped_to_user_id(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
     webhook = db.create_webhook(
@@ -60,23 +50,17 @@ def test_delete_webhook_scoped_to_user_id(tmp_path, monkeypatch):
 
 
 def test_delete_nonexistent_webhook_returns_false(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
     assert db.delete_webhook(user_id=1, webhook_id="does-not-exist") is False
 
 
 def test_find_subscribers_matches_exact_event_type(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
-    db.create_webhook(
-        user_id=1, target_url="https://a.test", events=["session.completed"]
-    )
+    db.create_webhook(user_id=1, target_url="https://a.test", events=["session.completed"])
     db.create_webhook(user_id=1, target_url="https://b.test", events=["timer.started"])
 
     matches = db.find_subscribers(1, "session.completed")
@@ -84,24 +68,17 @@ def test_find_subscribers_matches_exact_event_type(tmp_path, monkeypatch):
 
 
 def test_find_subscribers_wildcard_matches_any_event(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
     db.create_webhook(user_id=1, target_url="https://everything.test", events=["*"])
 
     assert len(db.find_subscribers(1, "session.completed")) == 1
-    assert (
-        len(db.find_subscribers(1, "a-totally-new-event-type-nobody-registered-for"))
-        == 1
-    )
+    assert len(db.find_subscribers(1, "a-totally-new-event-type-nobody-registered-for")) == 1
 
 
 def test_find_subscribers_never_crosses_user_boundary(tmp_path, monkeypatch):
-    monkeypatch.setattr(
-        "studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db")
-    )
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()
 
     db.create_webhook(user_id=1, target_url="https://a.test", events=["*"])

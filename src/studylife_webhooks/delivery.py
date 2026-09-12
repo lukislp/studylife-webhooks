@@ -81,9 +81,7 @@ async def deliver_one(
         return DeliveryResult(webhook_id=webhook.id, delivered=False, error=str(exc))
 
     _record_upstream(start, outcome="ok" if response.is_success else "http_error")
-    DELIVERIES_TOTAL.labels(
-        outcome="delivered" if response.is_success else "failed"
-    ).inc()
+    DELIVERIES_TOTAL.labels(outcome="delivered" if response.is_success else "failed").inc()
     return DeliveryResult(
         webhook_id=webhook.id,
         delivered=response.is_success,

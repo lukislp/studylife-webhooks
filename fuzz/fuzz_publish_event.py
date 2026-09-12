@@ -12,6 +12,7 @@ CI runs the same harness for a short, fixed time budget (see .github/workflows/c
 
 from __future__ import annotations
 
+import contextlib
 import sys
 
 import atheris
@@ -26,10 +27,8 @@ def test_one_input(data: bytes) -> None:
     fdp = atheris.FuzzedDataProvider(data)
     body = fdp.ConsumeBytes(256)
     for model in (PublishEventIn, CreateWebhookIn):
-        try:
+        with contextlib.suppress(ValidationError):
             model.model_validate_json(body)
-        except ValidationError:
-            pass
     digest = sign_payload(fdp.ConsumeUnicodeNoSurrogates(32), body)
     if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
         raise AssertionError(f"sign_payload produced {digest!r}")

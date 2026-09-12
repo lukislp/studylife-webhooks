@@ -39,9 +39,7 @@ def init_db() -> None:
             )
             """
         )
-        conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_webhooks_user_id ON webhooks(user_id)"
-        )
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_webhooks_user_id ON webhooks(user_id)")
 
 
 @contextmanager
@@ -69,7 +67,8 @@ def _row_to_webhook(row: tuple) -> Webhook:
 def list_webhooks(user_id: int) -> list[Webhook]:
     with _connect() as conn:
         rows = conn.execute(
-            "SELECT id, user_id, target_url, events, secret, created_at FROM webhooks WHERE user_id = ?",
+            "SELECT id, user_id, target_url, events, secret, created_at"
+            " FROM webhooks WHERE user_id = ?",
             (user_id,),
         ).fetchall()
     return [_row_to_webhook(r) for r in rows]
@@ -90,7 +89,8 @@ def create_webhook(user_id: int, target_url: str, events: list[str]) -> Webhook:
     )
     with _connect() as conn:
         conn.execute(
-            "INSERT INTO webhooks (id, user_id, target_url, events, secret, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            "INSERT INTO webhooks (id, user_id, target_url, events, secret, created_at)"
+            " VALUES (?, ?, ?, ?, ?, ?)",
             (
                 webhook.id,
                 webhook.user_id,
@@ -118,6 +118,4 @@ def find_subscribers(user_id: int, event_type: str) -> list[Webhook]:
     wildcard "*" (subscribe to everything - see the README) - a plain string match, no schema
     validation against a closed catalog, so a brand-new event type on the StudyLife side is
     matchable here without any change to this service."""
-    return [
-        w for w in list_webhooks(user_id) if event_type in w.events or "*" in w.events
-    ]
+    return [w for w in list_webhooks(user_id) if event_type in w.events or "*" in w.events]

@@ -59,12 +59,8 @@ async def record_request_metrics(request: Request, call_next):
     route_label = route.path if route is not None else "unmatched"
     status_class = f"{response.status_code // 100}xx"
 
-    REQUEST_DURATION_SECONDS.labels(route=route_label, method=request.method).observe(
-        duration
-    )
-    REQUESTS_TOTAL.labels(
-        route=route_label, method=request.method, status_class=status_class
-    ).inc()
+    REQUEST_DURATION_SECONDS.labels(route=route_label, method=request.method).observe(duration)
+    REQUESTS_TOTAL.labels(route=route_label, method=request.method, status_class=status_class).inc()
 
     return response
 
@@ -78,13 +74,8 @@ def metrics() -> Response:
 def require_shared_secret(
     x_studylife_shared_secret: Annotated[str | None, Header()] = None,
 ) -> None:
-    if (
-        not settings.shared_secret
-        or x_studylife_shared_secret != settings.shared_secret
-    ):
-        raise HTTPException(
-            status_code=401, detail="Invalid or missing X-StudyLife-Shared-Secret"
-        )
+    if not settings.shared_secret or x_studylife_shared_secret != settings.shared_secret:
+        raise HTTPException(status_code=401, detail="Invalid or missing X-StudyLife-Shared-Secret")
 
 
 class WebhookOut(BaseModel):
@@ -98,9 +89,7 @@ class WebhookOut(BaseModel):
 
     @classmethod
     def from_webhook(cls, w: db.Webhook) -> "WebhookOut":
-        return cls(
-            id=w.id, target_url=w.target_url, events=w.events, created_at=w.created_at
-        )
+        return cls(id=w.id, target_url=w.target_url, events=w.events, created_at=w.created_at)
 
 
 class CreateWebhookIn(BaseModel):
@@ -142,9 +131,7 @@ def create_webhook(body: CreateWebhookIn) -> CreateWebhookOut:
     )
 
 
-@app.delete(
-    "/internal/webhooks/{webhook_id}", dependencies=[Depends(require_shared_secret)]
-)
+@app.delete("/internal/webhooks/{webhook_id}", dependencies=[Depends(require_shared_secret)])
 def delete_webhook(webhook_id: str, user_id: Annotated[int, Query()]) -> None:
     if not db.delete_webhook(user_id, webhook_id):
         raise HTTPException(status_code=404, detail="Webhook not found")
@@ -153,9 +140,7 @@ def delete_webhook(webhook_id: str, user_id: Annotated[int, Query()]) -> None:
 @app.post("/internal/events", dependencies=[Depends(require_shared_secret)])
 async def publish_event(body: PublishEventIn) -> PublishEventOut:
     subscribers = db.find_subscribers(body.user_id, body.event_type)
-    results = await deliver_all(
-        subscribers, body.event_type, body.occurred_at, body.payload
-    )
+    results = await deliver_all(subscribers, body.event_type, body.occurred_at, body.payload)
     delivered = sum(1 for r in results if r.delivered)
     return PublishEventOut(delivered=delivered, failed=len(results) - delivered)
 
