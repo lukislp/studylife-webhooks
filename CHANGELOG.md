@@ -1,3 +1,10 @@
+## [1.2.10](https://github.com/lukislp/studylife-webhooks/compare/v1.2.9...v1.2.10) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** add explicit egress policy for the delivery pod ([#40](https://github.com/lukislp/studylife-webhooks/issues/40)) ([5eebc8b](https://github.com/lukislp/studylife-webhooks/commit/5eebc8bf653b697cb7b9004989a75482bddb2425))
+
 ## [1.2.9](https://github.com/lukislp/studylife-webhooks/compare/v1.2.8...v1.2.9) (2026-09-13)
 
 
