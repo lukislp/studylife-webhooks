@@ -1,3 +1,10 @@
+## [1.2.13](https://github.com/lukislp/studylife-webhooks/compare/v1.2.12...v1.2.13) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** give probes a 5s timeout so load spikes stop killing pods ([#43](https://github.com/lukislp/studylife-webhooks/issues/43)) ([19bf73e](https://github.com/lukislp/studylife-webhooks/commit/19bf73e983282fd0248e545017f02f3c6c74c314))
+
 ## [1.2.12](https://github.com/lukislp/studylife-webhooks/compare/v1.2.11...v1.2.12) (2026-09-13)
 
 
