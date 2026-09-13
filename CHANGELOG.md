@@ -1,3 +1,10 @@
+## [1.2.14](https://github.com/lukislp/studylife-webhooks/compare/v1.2.13...v1.2.14) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** seal studylife-webhooks-secrets so it survives a cluster rebuild ([#44](https://github.com/lukislp/studylife-webhooks/issues/44)) ([d9b42c5](https://github.com/lukislp/studylife-webhooks/commit/d9b42c582f618f744710a3a7593fe339267595e8))
+
 ## [1.2.13](https://github.com/lukislp/studylife-webhooks/compare/v1.2.12...v1.2.13) (2026-09-13)
 
 
