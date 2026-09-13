@@ -1,3 +1,10 @@
+## [1.2.9](https://github.com/lukislp/studylife-webhooks/compare/v1.2.8...v1.2.9) (2026-09-13)
+
+
+### Bug Fixes
+
+* **docker:** apply Debian security updates at build time ([#39](https://github.com/lukislp/studylife-webhooks/issues/39)) ([626ec0f](https://github.com/lukislp/studylife-webhooks/commit/626ec0f32f136eb40937e94722609ad5a2b5201f))
+
 ## [1.2.8](https://github.com/lukislp/studylife-webhooks/compare/v1.2.7...v1.2.8) (2026-09-13)
 
 
