@@ -1,3 +1,10 @@
+## [1.2.11](https://github.com/lukislp/studylife-webhooks/compare/v1.2.10...v1.2.11) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** read-only root filesystem for studylife-webhooks ([#41](https://github.com/lukislp/studylife-webhooks/issues/41)) ([31a62e3](https://github.com/lukislp/studylife-webhooks/commit/31a62e372f77920f49bacc1519a8544f2690d6ee))
+
 ## [1.2.10](https://github.com/lukislp/studylife-webhooks/compare/v1.2.9...v1.2.10) (2026-09-13)
 
 
