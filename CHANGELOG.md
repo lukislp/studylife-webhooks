@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/lukislp/studylife-webhooks/compare/v1.2.7...v1.2.8) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** raise the studylife-webhooks namespace from PSS baseline to restricted ([#38](https://github.com/lukislp/studylife-webhooks/issues/38)) ([0de5e8f](https://github.com/lukislp/studylife-webhooks/commit/0de5e8f19888f9a254e87bf233a62648656e7361))
+
 ## [1.2.7](https://github.com/lukislp/studylife-webhooks/compare/v1.2.6...v1.2.7) (2026-09-12)
 
 
