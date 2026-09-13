@@ -67,3 +67,40 @@ spec:
           podSelector: { matchLabels: { app: prometheus } }
       ports:
         - { protocol: TCP, port: 8000 }
+---
+# Egress for the delivery pod. This service's whole job is POSTing to a user-configured
+# target_url (delivery.deliver_one) - an arbitrary URL stored per registration, never
+# validated against a scheme, host or port allowlist (see db.create_webhook). There is no
+# host list that could be enumerated here, so egress is scoped by DESTINATION RANGE instead
+# of by host:
+#
+#  1. Ports 80/443 to anywhere, including the LAN - the standard case for a subscriber
+#     endpoint (Zapier, n8n, Discord, a self-hosted automation on the local network).
+#  2. Every other port to anywhere EXCEPT this cluster's own pod network (10.42.0.0/16),
+#     its Service network (10.43.0.0/16) and the node/LAN subnet (192.168.20.0/24) - so a
+#     subscriber listening on a non-standard port (e.g. :8443, :5678) still works, while a
+#     compromised pod cannot use the same freedom to reach the other namespaces' databases,
+#     the kubelets or the Kubernetes API. Those three ranges are exactly what the old bare
+#     "- {}" egress rule left wide open.
+#
+# This service makes no calls to StudyLife at all: traffic with StudyLife is inbound only
+# (studylife-web POSTs /internal/events, see allow-studylife-web-to-app above). DNS is
+# covered by allow-dns; kubelet probes are not subject to NetworkPolicy at all.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: studylife-webhooks-egress
+  namespace: studylife-webhooks
+spec:
+  podSelector: { matchLabels: { app: studylife-webhooks } }
+  policyTypes: ["Egress"]
+  egress:
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports:
+        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 443 }
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: ["10.42.0.0/16", "10.43.0.0/16", "192.168.20.0/24"]
