@@ -1,3 +1,10 @@
+## [1.2.12](https://github.com/lukislp/studylife-webhooks/compare/v1.2.11...v1.2.12) (2026-09-13)
+
+
+### Bug Fixes
+
+* **k8s:** close the open egress hole in this namespace ([#42](https://github.com/lukislp/studylife-webhooks/issues/42)) ([89030c9](https://github.com/lukislp/studylife-webhooks/commit/89030c9b9dc2015a2aa6262433cdf949c987e22b))
+
 ## [1.2.11](https://github.com/lukislp/studylife-webhooks/compare/v1.2.10...v1.2.11) (2026-09-13)
 
 
