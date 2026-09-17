@@ -1,3 +1,10 @@
+## [1.2.15](https://github.com/lukislp/studylife-webhooks/compare/v1.2.14...v1.2.15) (2026-09-17)
+
+
+### Bug Fixes
+
+* **docker:** bump astral-sh/uv from 0.12.13 to 0.12.15 ([27ecd51](https://github.com/lukislp/studylife-webhooks/commit/27ecd51e0ba63fd08ad496fe5f79f962269bc298))
+
 ## [1.2.14](https://github.com/lukislp/studylife-webhooks/compare/v1.2.13...v1.2.14) (2026-09-13)
 
 
