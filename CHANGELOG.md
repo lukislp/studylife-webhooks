@@ -1,3 +1,10 @@
+## [1.2.17](https://github.com/lukislp/studylife-webhooks/compare/v1.2.16...v1.2.17) (2026-09-17)
+
+
+### Bug Fixes
+
+* **ci:** bump astral-sh/setup-uv from 10.0.1 to 10.1.0 ([#52](https://github.com/lukislp/studylife-webhooks/issues/52)) ([ee07888](https://github.com/lukislp/studylife-webhooks/commit/ee07888351d1cfe0402c3f9141b99391a7eef90b))
+
 ## [1.2.16](https://github.com/lukislp/studylife-webhooks/compare/v1.2.15...v1.2.16) (2026-09-17)
 
 
