@@ -1,3 +1,10 @@
+## [1.2.16](https://github.com/lukislp/studylife-webhooks/compare/v1.2.15...v1.2.16) (2026-09-17)
+
+
+### Bug Fixes
+
+* **deps:** bump ruff from 0.16.6 to 0.16.7 ([b826eee](https://github.com/lukislp/studylife-webhooks/commit/b826eee1ea9e70eaf67084d1a4f1852bb18931b5))
+
 ## [1.2.15](https://github.com/lukislp/studylife-webhooks/compare/v1.2.14...v1.2.15) (2026-09-17)
 
 
