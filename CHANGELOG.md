@@ -1,3 +1,10 @@
+## [1.2.19](https://github.com/lukislp/studylife-webhooks/compare/v1.2.18...v1.2.19) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ci:** correct missing Harden Runner allowlist ports (github.com:22, crl:80) ([#61](https://github.com/lukislp/studylife-webhooks/issues/61)) ([defbdc1](https://github.com/lukislp/studylife-webhooks/commit/defbdc1d0065dd582da85a10e654d770ded77a1a))
+
 ## [1.2.18](https://github.com/lukislp/studylife-webhooks/compare/v1.2.17...v1.2.18) (2026-09-20)
 
 
