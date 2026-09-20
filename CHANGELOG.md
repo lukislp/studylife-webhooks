@@ -1,3 +1,10 @@
+## [1.2.18](https://github.com/lukislp/studylife-webhooks/compare/v1.2.17...v1.2.18) (2026-09-20)
+
+
+### Bug Fixes
+
+* **ci:** add Harden Runner in audit mode to every job ([#59](https://github.com/lukislp/studylife-webhooks/issues/59)) ([c2a2fc1](https://github.com/lukislp/studylife-webhooks/commit/c2a2fc1176b70cbb4d8832f3f66e2f2ddb56f7bd))
+
 ## [1.2.17](https://github.com/lukislp/studylife-webhooks/compare/v1.2.16...v1.2.17) (2026-09-17)
 
 
