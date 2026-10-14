@@ -2,7 +2,7 @@
 # Dependabot's docker updates) instead of an unpinned `pip install uv`.
 FROM ghcr.io/astral-sh/uv:0.13.0@sha256:cdc6093146eb3ff6a40107b38f008b789e050e77ad87865e381d9917da55a168 AS uv
 
-FROM python:3.12-slim@sha256:05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f
+FROM python:3.12-slim@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
 
 # Pull in Debian's security updates on every build: the digest-pinned base image lags behind
 # the security archive (fixed CVEs in the base layer blocked the Trivy CRITICAL gate on
