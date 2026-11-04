@@ -5,8 +5,11 @@
 # Namespaces, Secrets, or NetworkPolicies, all three of which this repo also has (see
 # k8s/00-namespace.yaml, k8s/02-secret.yaml, k8s/04-network-policies.yaml). Those three are
 # bootstrap-only, applied once by hand; Flux continuously reconciles exactly this subset.
+# 05-tls-certificate.yaml is a cert-manager Certificate, which the reconciler's ClusterRole
+# (homelab-infra flux/01-reconciler-rbac.yaml) covers as well.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../01-config.yaml
   - ../03-app.yaml
+  - ../05-tls-certificate.yaml

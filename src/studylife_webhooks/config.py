@@ -16,6 +16,18 @@ class Settings(BaseSettings):
     # slow/unreachable subscriber can't stall the whole /internal/events call for long, since
     # deliveries to multiple subscribers for the same event run concurrently regardless.
     delivery_timeout_seconds: float = 5.0
+    # TLS for the StudyLife -> studylife-webhooks hop (see tls.py and README.md "TLS"). With both
+    # files set (PEM certificate chain and key; in the cluster the cert-manager certificate from
+    # k8s/05-tls-certificate.yaml), the app is also served over HTTPS on tls_port. Only one of
+    # the two set, or a file that cannot be loaded, stops the start. The plain port stays for
+    # the kubelet probes and Prometheus. The shipped k8s manifests set both; unset is the
+    # explicit plain-HTTP opt-out for local runs.
+    tls_cert_file: str | None = None
+    tls_key_file: str | None = None
+    tls_port: int = 8443
+    # How often (seconds) the certificate files are checked for a renewal; new handshakes then
+    # use the renewed pair without a restart.
+    tls_reload_interval_seconds: float = 300.0
 
 
 settings = Settings()

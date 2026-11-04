@@ -108,6 +108,17 @@ part of the same rollout that instrumented this service.
 | `STUDYLIFE_WEBHOOKS_SHARED_SECRET` | Must match the `studylife` repo's `StudyLifeWebhooks:SharedSecret` exactly - authenticates every `/internal/*` call as genuinely coming from StudyLife. |
 | `STUDYLIFE_WEBHOOKS_DB_PATH` | SQLite file for registration state (default `webhooks.db`). This service's own state - StudyLife never stores a copy of it. |
 | `STUDYLIFE_WEBHOOKS_DELIVERY_TIMEOUT_SECONDS` | Per-delivery HTTP timeout (default `5.0`). |
+| `STUDYLIFE_WEBHOOKS_TLS_CERT_FILE` / `STUDYLIFE_WEBHOOKS_TLS_KEY_FILE` | PEM certificate chain and private key. When both are set, the app is also served over HTTPS (see [TLS](#tls)). Unset (default) is the explicit plain-HTTP opt-out for local runs. |
+| `STUDYLIFE_WEBHOOKS_TLS_PORT` | HTTPS port (default `8443`). |
+| `STUDYLIFE_WEBHOOKS_TLS_RELOAD_INTERVAL_SECONDS` | How often the certificate files are checked for a renewal (default `300`). |
+
+### TLS
+
+Every call from StudyLife carries the shared secret, so that hop is encrypted. With both TLS files set, [`tls.py`](src/studylife_webhooks/tls.py) starts a second `uvicorn.Server` in the same process that serves the same app over HTTPS on `STUDYLIFE_WEBHOOKS_TLS_PORT`, TLS 1.2 minimum. Only one file set, an unloadable certificate or a port that cannot be bound stops the start, so the service never runs without the TLS listener it was asked for. uvicorn does not reload certificates itself; `tls.py` checks the files periodically and loads a renewed pair into the running listener, so new handshakes use it without a restart.
+
+In k3s the certificate is a cert-manager `Certificate` ([`k8s/05-tls-certificate.yaml`](k8s/05-tls-certificate.yaml), Flux-managed) from StudyLife's internal CA (`studylife-internal-ca-issuer`) for `studylife-webhooks.studylife-webhooks.svc.cluster.local`, `studylife-webhooks.studylife-webhooks.svc` and `studylife-webhooks`. StudyLife validates it against that CA, host name included (`AddonTls:CaCertificatePath`, see StudyLife's [SECURITY-ASSURANCE.md](https://github.com/lukislp/studylife/blob/main/docs/SECURITY-ASSURANCE.md) section 8.3), and with `AddonTls:RequireHttps` refuses `http://` add-on URLs. Port `8000` stays plain HTTP for the kubelet probes and Prometheus.
+
+Rollout order: this repository first (Certificate, port and TLS variables through Flux; the listener starts with the release image), then the updated `k8s/04-network-policies.yaml` applied by hand (it only adds `8443`), then StudyLife's switch of `StudyLifeWebhooks__BaseUrl` to `https://studylife-webhooks.studylife-webhooks.svc.cluster.local:8443`.
 
 ## Development
 

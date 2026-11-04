@@ -17,10 +17,13 @@ own WebhookEventTypes catalog is documentation for callers, not a contract this 
 is the whole point of "theoretically subscribe to anything" instead of one hardcoded event.
 """
 
+import asyncio
+import contextlib
 import time
 from contextlib import asynccontextmanager
 from typing import Annotated
 
+import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
@@ -32,12 +35,41 @@ from studylife_webhooks.metrics import (
     REQUESTS_TOTAL,
     render_latest,
 )
+from studylife_webhooks.tls import (
+    build_tls_server,
+    start_tls_server,
+    stop_tls_servers,
+    tls_files,
+    watch_certificates,
+)
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(app: FastAPI):
     db.init_db()
-    yield
+    # HTTPS listener for the StudyLife -> studylife-webhooks hop (tls.py): the same app again on
+    # tls_port, only when the certificate files are configured. A failure here raises, so
+    # uvicorn exits instead of running without it.
+    tls_servers: list[uvicorn.Server] = []
+    tls_tasks: list[asyncio.Task[None]] = []
+    cert_watch_task: asyncio.Task[None] | None = None
+    try:
+        files = tls_files(settings.tls_cert_file, settings.tls_key_file)
+        if files is not None:
+            # "info": the same level as the plain server from the Dockerfile's CMD.
+            tls_servers = [build_tls_server(app, settings.tls_port, files, log_level="info")]
+            for server in tls_servers:
+                tls_tasks.append(await start_tls_server(server))
+            cert_watch_task = asyncio.create_task(
+                watch_certificates(tls_servers, files, settings.tls_reload_interval_seconds)
+            )
+        yield
+    finally:
+        if cert_watch_task is not None:
+            cert_watch_task.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await cert_watch_task
+        await stop_tls_servers(tls_servers, tls_tasks)
 
 
 app = FastAPI(title="studylife-webhooks", lifespan=lifespan)
