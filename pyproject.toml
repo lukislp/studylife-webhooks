@@ -19,6 +19,8 @@ fuzz = [
     "atheris>=2.3",
 ]
 dev = [
+    # Throwaway CA and server certificates for the TLS listener tests (tests/test_tls.py).
+    "cryptography>=44",
     # Starlette 1.6 deprecates its TestClient over httpx and warns on every test run until
     # httpx2 is installed.
     "httpx2>=2.12",

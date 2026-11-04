@@ -49,6 +49,10 @@ spec:
           podSelector: { matchLabels: { app: studylife-web } }
       ports:
         - { protocol: TCP, port: 8000 }
+        # HTTPS listener (tls.py, STUDYLIFE_WEBHOOKS_TLS_PORT) - the port StudyLife's
+        # StudyLifeWebhooks__BaseUrl uses once it calls over TLS. 8000 stays allowed until that
+        # switch is live and can be dropped afterwards.
+        - { protocol: TCP, port: 8443 }
 ---
 # Lets the existing self-hosted Prometheus (studylife repo's k8s/14-prometheus.yaml) scrape
 # /metrics - it reaches pods directly (kubernetes_sd_configs, role: pod), not through any
