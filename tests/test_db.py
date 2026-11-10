@@ -56,6 +56,43 @@ def test_delete_nonexistent_webhook_returns_false(tmp_path, monkeypatch):
     assert db.delete_webhook(user_id=1, webhook_id="does-not-exist") is False
 
 
+def test_delete_user_removes_only_that_users_registrations(tmp_path, monkeypatch):
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
+    db.init_db()
+    db.create_webhook(user_id=1, target_url="https://a.test", events=["*"])
+    db.create_webhook(user_id=1, target_url="https://a2.test", events=["session.completed"])
+    kept = db.create_webhook(user_id=2, target_url="https://b.test", events=["*"])
+
+    assert db.delete_user(1) == 2
+
+    assert db.list_webhooks(1) == []
+    assert [w.id for w in db.list_webhooks(2)] == [kept.id]
+
+
+def test_delete_user_is_idempotent(tmp_path, monkeypatch):
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
+    db.init_db()
+    db.create_webhook(user_id=1, target_url="https://a.test", events=["*"])
+
+    assert db.delete_user(1) == 1
+    assert db.delete_user(1) == 0
+    assert db.delete_user(999) == 0
+
+
+def test_delete_user_leaves_no_secret_in_the_file(tmp_path, monkeypatch):
+    path = tmp_path / "t.db"
+    monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(path))
+    db.init_db()
+    webhook = db.create_webhook(user_id=1, target_url="https://a.test/needle", events=["*"])
+    assert webhook.secret.encode() in path.read_bytes()
+
+    db.delete_user(1)
+
+    content = path.read_bytes()
+    assert webhook.secret.encode() not in content
+    assert b"https://a.test/needle" not in content
+
+
 def test_find_subscribers_matches_exact_event_type(tmp_path, monkeypatch):
     monkeypatch.setattr("studylife_webhooks.config.settings.db_path", str(tmp_path / "t.db"))
     db.init_db()

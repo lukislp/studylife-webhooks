@@ -146,6 +146,10 @@ class PublishEventOut(BaseModel):
     failed: int
 
 
+class PurgeUserOut(BaseModel):
+    deleted: int
+
+
 @app.get("/internal/webhooks", dependencies=[Depends(require_shared_secret)])
 def list_webhooks(user_id: Annotated[int, Query()]) -> list[WebhookOut]:
     return [WebhookOut.from_webhook(w) for w in db.list_webhooks(user_id)]
@@ -167,6 +171,15 @@ def create_webhook(body: CreateWebhookIn) -> CreateWebhookOut:
 def delete_webhook(webhook_id: str, user_id: Annotated[int, Query()]) -> None:
     if not db.delete_webhook(user_id, webhook_id):
         raise HTTPException(status_code=404, detail="Webhook not found")
+
+
+@app.delete("/internal/users/{user_id}", dependencies=[Depends(require_shared_secret)])
+def purge_user(user_id: int) -> PurgeUserOut:
+    """Account deletion in StudyLife: forget everything stored for this user. Idempotent - a user
+    with nothing registered (or a repeated call) answers 200 with deleted=0, never 404, because
+    StudyLife retries this until it gets a success and cannot tell "nothing to do" from "route
+    missing" otherwise (an older version of this service answers 404 for the unknown route)."""
+    return PurgeUserOut(deleted=db.delete_user(user_id))
 
 
 @app.post("/internal/events", dependencies=[Depends(require_shared_secret)])
