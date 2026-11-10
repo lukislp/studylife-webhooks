@@ -113,6 +113,17 @@ def delete_webhook(user_id: int, webhook_id: str) -> bool:
     return cursor.rowcount > 0
 
 
+def delete_user(user_id: int) -> int:
+    """Removes every registration of one user (account deletion in StudyLife). Returns how many
+    rows went - 0 is a normal answer (the user never registered anything, or this was already
+    done), which is what makes the call safe to retry. `secure_delete` makes SQLite overwrite the
+    freed pages instead of leaving the signing secrets and target URLs readable in the file."""
+    with _connect() as conn:
+        conn.execute("PRAGMA secure_delete = ON")
+        cursor = conn.execute("DELETE FROM webhooks WHERE user_id = ?", (user_id,))
+    return cursor.rowcount
+
+
 def find_subscribers(user_id: int, event_type: str) -> list[Webhook]:
     """Every webhook for this user whose events list contains this exact event_type, or the
     wildcard "*" (subscribe to everything - see the README) - a plain string match, no schema

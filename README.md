@@ -22,6 +22,9 @@ types" below). Point it at Zapier, n8n, a Discord webhook, or anything else you 
 3. When something happens, StudyLife tells this service, and this service delivers a signed
    `POST` to every matching registration concurrently (one slow/unreachable subscriber never
    delays another's delivery).
+4. When the StudyLife account is deleted, StudyLife calls `DELETE /internal/users/{user_id}` and this
+   service removes every registration of that user (idempotent: `{"deleted": n}`, also for a user with
+   nothing registered; StudyLife retries it until it gets a 200).
 
 ## Delivery payload
 

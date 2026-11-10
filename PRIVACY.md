@@ -22,6 +22,13 @@ Locally, in this service's own SQLite database, never shared with StudyLife or a
 - A per-registration signing secret (used to sign outgoing deliveries so your receiving
   endpoint can verify authenticity) - shown to you once, at creation time.
 
+## Deleting your data
+
+When an account is deleted in StudyLife, your StudyLife server calls this service to delete every
+registration stored for that account (target URLs, event lists and signing secrets). The call is
+retried until this service confirms it, and the rows are overwritten in the database file
+(`secure_delete`), not just unlinked. Backups of the database file you made yourself are not touched.
+
 ## What this service sends
 
 - A signed HTTP `POST` to each of your registered target URLs, only when a subscribed event

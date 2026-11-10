@@ -39,6 +39,42 @@ def test_internal_routes_reject_wrong_shared_secret(client):
     assert response.status_code == 401
 
 
+def test_purge_user_requires_the_shared_secret(client):
+    assert client.delete("/internal/users/1").status_code == 401
+    assert (
+        client.delete(
+            "/internal/users/1", headers={"X-StudyLife-Shared-Secret": "wrong"}
+        ).status_code
+        == 401
+    )
+
+
+def test_purge_user_deletes_only_that_users_webhooks_and_is_idempotent(client):
+    for user_id in (1, 1, 2):
+        client.post(
+            "/internal/webhooks",
+            json={"user_id": user_id, "target_url": "https://example.com/hook", "events": ["*"]},
+            headers=HEADERS,
+        )
+
+    first = client.delete("/internal/users/1", headers=HEADERS)
+    again = client.delete("/internal/users/1", headers=HEADERS)
+    unknown = client.delete("/internal/users/12345", headers=HEADERS)
+
+    assert first.status_code == 200
+    assert first.json() == {"deleted": 2}
+    # Never a 404: StudyLife retries until it sees a success, and "nothing to delete" is one.
+    assert again.status_code == 200
+    assert again.json() == {"deleted": 0}
+    assert unknown.json() == {"deleted": 0}
+    assert client.get("/internal/webhooks", params={"user_id": 1}, headers=HEADERS).json() == []
+    assert len(client.get("/internal/webhooks", params={"user_id": 2}, headers=HEADERS).json()) == 1
+
+
+def test_purge_user_rejects_a_non_numeric_user_id(client):
+    assert client.delete("/internal/users/not-a-number", headers=HEADERS).status_code == 422
+
+
 def test_create_webhook_returns_secret_once(client):
     response = client.post(
         "/internal/webhooks",
