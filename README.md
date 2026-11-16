@@ -28,6 +28,18 @@ types" below). Point it at Zapier, n8n, a Discord webhook, or anything else you 
    service removes every registration of that user (idempotent: `{"deleted": n}`, also for a user with
    nothing registered; StudyAtrium retries it until it gets a 200).
 
+### Where deliveries may go
+
+A target URL is user input, and this service runs inside the cluster. Every delivery therefore
+resolves the target's host itself, refuses it when ANY resolved address is private, loopback,
+link-local (including `169.254.169.254`), carrier-grade NAT (`100.64.0.0/10`), unique-local or
+otherwise non-public (IPv6 spellings of IPv4 addresses included), and then connects only to the
+address it vetted - so a DNS answer cannot change between the check and the connection
+(`egress.py`). For https the certificate is still checked against the host name in the URL.
+Redirects are not followed, environment proxies are ignored, and the timeout is
+`STUDYLIFE_WEBHOOKS_DELIVERY_TIMEOUT_SECONDS`. A refused target counts as a failed delivery with
+the `blocked` outcome. A receiver on your own LAN needs a public address or a tunnel.
+
 ## Delivery payload
 
 ```json
@@ -95,7 +107,7 @@ unbounded cardinality otherwise).
 | --- | --- | --- | --- |
 | `studylife_webhooks_request_duration_seconds` | Histogram | `route`, `method` | HTTP latency per route |
 | `studylife_webhooks_requests_total` | Counter | `route`, `method`, `status_class` | HTTP request volume by outcome |
-| `studylife_webhooks_upstream_requests_total` | Counter | `target`, `outcome` (`ok`/`http_error`/`failed`/`timeout`) | Outbound delivery attempts by outcome |
+| `studylife_webhooks_upstream_requests_total` | Counter | `target`, `outcome` (`ok`/`http_error`/`failed`/`timeout`/`blocked`) | Outbound delivery attempts by outcome |
 | `studylife_webhooks_upstream_request_duration_seconds` | Histogram | `target` | Outbound delivery latency |
 | `studylife_webhooks_deliveries_total` | Counter | `outcome` (`delivered`/`failed`) | Overall delivery success rate |
 
