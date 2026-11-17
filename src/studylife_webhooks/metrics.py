@@ -36,6 +36,8 @@ REQUESTS_TOTAL = Counter(
 # distinguishes a genuine network/timeout failure from a response that came back but wasn't
 # 2xx - both count as "not delivered" for deliveries_total below, but they're different failure
 # modes worth telling apart here (a subscriber's server being down vs. it rejecting the payload).
+# "blocked" is a target whose host resolved to a non-public address (egress.py); no connection
+# was opened.
 UPSTREAM_REQUESTS_TOTAL = Counter(
     "studylife_webhooks_upstream_requests_total",
     "Total outbound delivery attempts, by target and outcome.",

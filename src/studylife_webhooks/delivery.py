@@ -2,7 +2,12 @@
 receiving end can verify the payload genuinely came from here, not just anyone who guessed the
 URL. Deliveries for the same event fan out concurrently (asyncio.gather) so one slow/unreachable
 subscriber can't delay another's delivery, bounded by Settings.delivery_timeout_seconds so a
-dead subscriber can't stall the whole /internal/events call either."""
+dead subscriber can't stall the whole /internal/events call either.
+
+target_url is user input and this service runs inside the cluster, so every delivery goes through
+egress.VettedTransport: the host is resolved and vetted at connect time and the socket only ever
+reaches a public address (2026-11-16 audit M4). Redirects are not followed and no environment
+proxy is used."""
 
 import asyncio
 import hashlib
@@ -15,6 +20,7 @@ import httpx
 
 from studylife_webhooks.config import settings
 from studylife_webhooks.db import Webhook
+from studylife_webhooks.egress import VettedTransport, is_address_rejection
 from studylife_webhooks.metrics import (
     DELIVERIES_TOTAL,
     UPSTREAM_REQUEST_DURATION_SECONDS,
@@ -46,8 +52,8 @@ async def deliver_one(
     payload: dict,
     transport: httpx.AsyncBaseTransport | None = None,
 ) -> DeliveryResult:
-    """transport is injectable purely for tests (httpx.MockTransport) - real callers just use
-    the default (a genuine network transport)."""
+    """transport is injectable purely for tests (httpx.MockTransport, or a VettedTransport with
+    a fake resolver) - real callers use the default, a VettedTransport on system DNS."""
     body = json.dumps(
         {"event_type": event_type, "occurred_at": occurred_at, "payload": payload}
     ).encode()
@@ -55,7 +61,10 @@ async def deliver_one(
     start = time.perf_counter()
     try:
         async with httpx.AsyncClient(
-            timeout=settings.delivery_timeout_seconds, transport=transport
+            timeout=settings.delivery_timeout_seconds,
+            transport=transport or VettedTransport(),
+            follow_redirects=False,
+            trust_env=False,
         ) as client:
             response = await client.post(
                 webhook.target_url,
@@ -76,7 +85,8 @@ async def deliver_one(
         DELIVERIES_TOTAL.labels(outcome="failed").inc()
         return DeliveryResult(webhook_id=webhook.id, delivered=False, error=str(exc))
     except httpx.HTTPError as exc:
-        _record_upstream(start, outcome="failed")
+        # "blocked": the target resolved to a non-public address and no connection was opened.
+        _record_upstream(start, outcome="blocked" if is_address_rejection(exc) else "failed")
         DELIVERIES_TOTAL.labels(outcome="failed").inc()
         return DeliveryResult(webhook_id=webhook.id, delivered=False, error=str(exc))
 
