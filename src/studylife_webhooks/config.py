@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """STUDYLIFE_WEBHOOKS_SHARED_SECRET must match the studylife repo's
     StudyLifeWebhooks:SharedSecret config value exactly - it's the one thing that authenticates
     every /internal/* call as genuinely coming from StudyLife (see WebhooksProxyClient there).
-    DB_PATH is a local SQLite file - registration state is this service's own, StudyLife never
+    DB_PATH is a local SQLite file - registration state is this service's own, StudyAtrium never
     stores a copy of it."""
 
     model_config = SettingsConfigDict(env_prefix="STUDYLIFE_WEBHOOKS_")
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # slow/unreachable subscriber can't stall the whole /internal/events call for long, since
     # deliveries to multiple subscribers for the same event run concurrently regardless.
     delivery_timeout_seconds: float = 5.0
-    # TLS for the StudyLife -> studylife-webhooks hop (see tls.py and README.md "TLS"). With both
+    # TLS for the StudyAtrium -> studylife-webhooks hop (see tls.py and README.md "TLS"). With both
     # files set (PEM certificate chain and key; in the cluster the cert-manager certificate from
     # k8s/05-tls-certificate.yaml), the app is also served over HTTPS on tls_port. Only one of
     # the two set, or a file that cannot be loaded, stops the start. The plain port stays for

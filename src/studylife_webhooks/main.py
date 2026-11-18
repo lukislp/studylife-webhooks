@@ -1,4 +1,4 @@
-"""studylife-webhooks: a small microservice extending StudyLife (see
+"""studylife-webhooks: a small microservice extending StudyAtrium (see
 github.com/lukislp/studylife) so external automations (Zapier, n8n, Discord, etc.) can react to
 StudyLife events over plain signed HTTP callbacks, instead of StudyLife needing a bespoke
 integration per destination.
@@ -47,7 +47,7 @@ from studylife_webhooks.tls import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.init_db()
-    # HTTPS listener for the StudyLife -> studylife-webhooks hop (tls.py): the same app again on
+    # HTTPS listener for the StudyAtrium -> studylife-webhooks hop (tls.py): the same app again on
     # tls_port, only when the certificate files are configured. A failure here raises, so
     # uvicorn exits instead of running without it.
     tls_servers: list[uvicorn.Server] = []
@@ -116,7 +116,7 @@ class WebhookOut(BaseModel):
     events: list[str]
     created_at: str
     # secret is deliberately NEVER included here - only CreateWebhookOut (the one-time creation
-    # response) ever returns it, same "show the plaintext exactly once" pattern StudyLife itself
+    # response) ever returns it, same "show the plaintext exactly once" pattern StudyAtrium itself
     # uses for API keys.
 
     @classmethod

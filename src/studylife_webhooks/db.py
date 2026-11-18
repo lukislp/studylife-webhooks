@@ -1,7 +1,7 @@
-"""Registration storage - one small SQLite table, this service's own state (StudyLife never
+"""Registration storage - one small SQLite table, this service's own state (StudyAtrium never
 stores a copy of it, see WebhooksProxyClient's doc comment on the studylife side). Plain sqlite3
 used synchronously (FastAPI runs sync def endpoints in a threadpool automatically) rather than
-aiosqlite - this service's request volume is registration CRUD plus one write per StudyLife
+aiosqlite - this service's request volume is registration CRUD plus one write per StudyAtrium
 event, nowhere near enough to need an async driver."""
 
 import json
@@ -114,7 +114,7 @@ def delete_webhook(user_id: int, webhook_id: str) -> bool:
 
 
 def delete_user(user_id: int) -> int:
-    """Removes every registration of one user (account deletion in StudyLife). Returns how many
+    """Removes every registration of one user (account deletion in StudyAtrium). Returns how many
     rows went - 0 is a normal answer (the user never registered anything, or this was already
     done), which is what makes the call safe to retry. `secure_delete` makes SQLite overwrite the
     freed pages instead of leaving the signing secrets and target URLs readable in the file."""

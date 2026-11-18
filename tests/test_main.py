@@ -63,7 +63,7 @@ def test_purge_user_deletes_only_that_users_webhooks_and_is_idempotent(client):
 
     assert first.status_code == 200
     assert first.json() == {"deleted": 2}
-    # Never a 404: StudyLife retries until it sees a success, and "nothing to delete" is one.
+    # Never a 404: StudyAtrium retries until it sees a success, and "nothing to delete" is one.
     assert again.status_code == 200
     assert again.json() == {"deleted": 0}
     assert unknown.json() == {"deleted": 0}

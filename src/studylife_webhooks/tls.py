@@ -1,8 +1,8 @@
-"""Optional HTTPS listener for the StudyLife -> studylife-webhooks hop.
+"""Optional HTTPS listener for the StudyAtrium -> studylife-webhooks hop.
 
 StudyLife's backend calls every /internal/* route with the shared secret
 (X-StudyLife-Shared-Secret), so the hop has to be encrypted (OpenSSF `crypto_used_network`,
-StudyLife's docs/SECURITY-ASSURANCE.md section 8.3). StudyLife validates the certificate against
+StudyLife's docs/SECURITY-ASSURANCE.md section 8.3). StudyAtrium validates the certificate against
 its own internal CA, host name included (its `AddonTls:*` settings), so the certificate here is
 the cert-manager one issued by `studylife-internal-ca-issuer` (k8s/05-tls-certificate.yaml).
 
