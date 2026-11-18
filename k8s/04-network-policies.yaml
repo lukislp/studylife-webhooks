@@ -49,7 +49,7 @@ spec:
           podSelector: { matchLabels: { app: studylife-web } }
       ports:
         - { protocol: TCP, port: 8000 }
-        # HTTPS listener (tls.py, STUDYLIFE_WEBHOOKS_TLS_PORT) - the port StudyLife's
+        # HTTPS listener (tls.py, STUDYLIFE_WEBHOOKS_TLS_PORT) - the port StudyAtrium's
         # StudyLifeWebhooks__BaseUrl uses once it calls over TLS. 8000 stays allowed until that
         # switch is live and can be dropped afterwards.
         - { protocol: TCP, port: 8443 }
@@ -87,7 +87,7 @@ spec:
 # ports 80/443 were open to the whole LAN for self-hosted receivers - a receiver on the LAN now
 # needs a public address (or a tunnel) like any other.
 #
-# This service makes no calls to StudyLife at all: traffic with StudyLife is inbound only
+# This service makes no calls to StudyAtrium at all: traffic with StudyAtrium is inbound only
 # (studylife-web POSTs /internal/events, see allow-studylife-web-to-app above). DNS is
 # covered by allow-dns; kubelet probes are not subject to NetworkPolicy at all.
 apiVersion: networking.k8s.io/v1
