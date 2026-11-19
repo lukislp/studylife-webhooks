@@ -54,8 +54,15 @@ async def deliver_one(
 ) -> DeliveryResult:
     """transport is injectable purely for tests (httpx.MockTransport, or a VettedTransport with
     a fake resolver) - real callers use the default, a VettedTransport on system DNS."""
+    # user_id names the webhook's owner and sits inside the signed body, so the signature also
+    # proves whose event this is - a receiver shared by several users (e.g. a chat bot) needs it.
     body = json.dumps(
-        {"event_type": event_type, "occurred_at": occurred_at, "payload": payload}
+        {
+            "event_type": event_type,
+            "occurred_at": occurred_at,
+            "user_id": webhook.user_id,
+            "payload": payload,
+        }
     ).encode()
     signature = sign_payload(webhook.secret, body)
     start = time.perf_counter()
