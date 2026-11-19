@@ -46,9 +46,15 @@ the `blocked` outcome. A receiver on your own LAN needs a public address or a tu
 {
   "event_type": "session.completed",
   "occurred_at": "2026-08-29T12:00:00Z",
+  "user_id": 7,
   "payload": { "sessionId": 42, "courseName": "Analysis II", "durationMinutes": 52.0 }
 }
 ```
+
+`user_id` is the StudyAtrium user id of the webhook's owner. It is part of the signed body, so a
+receiver shared by several users (for example the Telegram bot) can trust whose event it is. User ids
+are only unique per StudyAtrium instance: a receiver fed by more than one instance must not treat the
+id alone as global.
 
 Each delivery carries an `X-StudyLife-Webhook-Signature` header - a hex HMAC-SHA256 of the exact
 raw request body, keyed with the webhook's own secret (shown once, at creation time, the same

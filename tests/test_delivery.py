@@ -60,8 +60,37 @@ async def test_deliver_one_success_sends_signature_header_and_body():
     assert body == {
         "event_type": "session.completed",
         "occurred_at": "2026-08-29T12:00:00Z",
+        "user_id": 1,
         "payload": {"sessionId": 42},
     }
+
+
+async def test_deliver_one_user_id_is_the_webhook_owner_and_is_signed():
+    captured: dict = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["headers"] = request.headers
+        captured["body"] = request.content
+        return httpx.Response(200)
+
+    webhook = _webhook(secret="my-secret")
+    webhook.user_id = 7
+    await deliver_one(
+        webhook,
+        "session.completed",
+        "2026-08-29T12:00:00Z",
+        {"user_id": 999},
+        transport=httpx.MockTransport(handler),
+    )
+
+    body = json.loads(captured["body"])
+    # The owner id comes from the webhook, never from the event payload.
+    assert body["user_id"] == 7
+    assert body["payload"] == {"user_id": 999}
+    # It is inside the signed bytes.
+    assert captured["headers"]["x-studylife-webhook-signature"] == sign_payload(
+        "my-secret", captured["body"]
+    )
 
 
 async def test_deliver_one_non_success_status_is_not_delivered():
