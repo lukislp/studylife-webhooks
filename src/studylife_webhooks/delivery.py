@@ -82,6 +82,9 @@ async def deliver_one(
                     # of the exact raw body sent, so the receiver can verify it without needing
                     # to re-serialize (and potentially reorder/reformat) the JSON themselves.
                     "X-StudyLife-Webhook-Signature": signature,
+                    # Names the webhook, and so which secret signed this: a receiver shared by
+                    # several users (e.g. a chat bot) looks the secret up by it. Not secret.
+                    "X-StudyLife-Webhook-Id": webhook.id,
                 },
             )
     except httpx.TimeoutException as exc:
