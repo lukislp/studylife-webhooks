@@ -56,6 +56,7 @@ async def test_deliver_one_success_sends_signature_header_and_body():
     assert result.status_code == 200
     expected_signature = sign_payload("my-secret", captured["body"])
     assert captured["headers"]["x-studylife-webhook-signature"] == expected_signature
+    assert captured["headers"]["x-studylife-webhook-id"] == webhook.id
     body = json.loads(captured["body"])
     assert body == {
         "event_type": "session.completed",

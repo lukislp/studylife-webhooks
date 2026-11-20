@@ -56,6 +56,9 @@ receiver shared by several users (for example the Telegram bot) can trust whose 
 are only unique per StudyAtrium instance: a receiver fed by more than one instance must not treat the
 id alone as global.
 
+Each delivery also carries an `X-StudyLife-Webhook-Id` header naming the webhook (not secret). A receiver
+shared by several webhooks, such as the Telegram bot, looks up the secret of that webhook by it.
+
 Each delivery carries an `X-StudyLife-Webhook-Signature` header - a hex HMAC-SHA256 of the exact
 raw request body, keyed with the webhook's own secret (shown once, at creation time, the same
 "plaintext exactly once" pattern StudyAtrium itself uses for API keys). Verify it before trusting
